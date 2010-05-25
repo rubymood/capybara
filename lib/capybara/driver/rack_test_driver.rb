@@ -112,16 +112,16 @@ class Capybara::Driver::RackTest < Capybara::Driver::Base
     def params(button)
       params = {}
 
-      node.xpath(".//input[@type!='radio' and @type!='checkbox' and @type!='submit']").map do |input|
+      node.xpath(".//input[@type!='radio' and @type!='checkbox' and @type!='submit' and not(@disabled)]").map do |input|
         merge_param!(params, input['name'].to_s, input['value'].to_s)
       end
-      node.xpath(".//textarea").map do |textarea|
+      node.xpath(".//textarea[not(@disabled)]").map do |textarea|
         merge_param!(params, textarea['name'].to_s, textarea.text.to_s)
       end
-      node.xpath(".//input[@type='radio' or @type='checkbox']").map do |input|
+      node.xpath(".//input[@type='radio' or @type='checkbox' and not(@disabled)]").map do |input|
         merge_param!(params, input['name'].to_s, input['value'].to_s) if input['checked']
       end
-      node.xpath(".//select").map do |select|
+      node.xpath(".//select[not(@disabled)]").map do |select|
         if select['multiple'] == 'multiple'
           options = select.xpath(".//option[@selected]")
           options.each do |option|
@@ -133,7 +133,7 @@ class Capybara::Driver::RackTest < Capybara::Driver::Base
           merge_param!(params, select['name'].to_s, (option['value'] || option.text).to_s) if option
         end
       end
-      node.xpath(".//input[@type='file']").map do |input|
+      node.xpath(".//input[@type='file' and not(@disabled)]").map do |input|
         unless input['value'].to_s.empty?
           if multipart?
             content_type = MIME::Types.type_for(input['value'].to_s).first.to_s
